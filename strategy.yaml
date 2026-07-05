@@ -1,0 +1,98 @@
+# 策略配置文件 - 你自己定义每个领域怎么做
+
+# ==================== 策略模板 ====================
+# 选一个你喜欢的模板，或者自己修改
+
+templates:
+  # 模板1: 简单分析（只看数据不做决策）
+  simple:
+    name: "简单分析"
+    description: "只搜索信息，不做决策分析"
+    flow:
+      金融: [搜索]
+      热点: [搜索, 保存草稿]
+      电商: [搜索]
+  
+  # 模板2: 技术分析（布林带策略）
+  technical:
+    name: "技术分析"
+    description: "用布林带分析，给出买卖方向"
+    flow:
+      金融: [搜索, 布林带分析, 推送微信]
+      热点: [搜索, 生成梗图, 保存草稿]
+      电商: [搜索]
+  
+  # 模板3: AI决策（LLM深度分析）
+  ai_decision:
+    name: "AI决策"
+    description: "用大模型做深度分析和决策"
+    flow:
+      金融: [搜索, 布林带分析, LLM决策, 推送微信]
+      热点: [搜索, 生成梗图, LLM润色文案, 保存草稿]
+      电商: [搜索, LLM分析]
+
+# ==================== 你的个人策略 ====================
+# 在这里定义你自己的策略流程
+# 可选步骤: 搜索, 布林带分析, LLM决策, LLM润色文案, 生成梗图, 推送微信, 保存草稿
+
+my_strategy:
+  name: "我的策略"
+  
+  # 金融领域流程
+  金融:
+    steps:
+      - step: 搜索
+        config:
+          sources: ["coingecko", "yahoo_finance"]
+      - step: 布林带分析
+        config:
+          symbols: ["BTCUSDT", "ETHUSDT", "NVDA", "AAPL"]
+          timeframe: 4h
+          strategy: "下轨做多，上轨看空"
+      - step: LLM决策
+        config:
+          prompt: "根据布林带信号和市场数据，给出明确的买卖建议"
+      - step: 推送微信
+        config:
+          enabled: true
+  
+  # 热点领域流程
+  热点:
+    steps:
+      - step: 搜索
+        config:
+          sources: ["weibo", "douyin"]
+      - step: 生成梗图
+        config:
+          style: "搞笑, 自嘲, 打工人"
+      - step: LLM润色文案
+        config:
+          enabled: true
+          style: "幽默, 简短, 有情绪价值"
+      - step: 保存草稿
+        config:
+          platforms: ["微信", "微博", "抖音"]
+  
+  # 电商领域流程
+  电商:
+    steps:
+      - step: 搜索
+        config:
+          sources: ["smzdm", "jd"]
+      - step: LLM决策
+        config:
+          prompt: "找出最值得买的商品，给出理由"
+  
+  # 科技领域流程
+  科技:
+    steps:
+      - step: 搜索
+        config:
+          sources: ["tech_sina", "ithome"]
+  
+  # 新闻领域流程
+  新闻:
+    steps:
+      - step: 搜索
+        config:
+          sources: ["news_sina", "baidu"]
