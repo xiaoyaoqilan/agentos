@@ -1,9 +1,8 @@
-# Agent OS - 分层自治系统
+# Agent OS - 通用Agent操作系统
 
-> **一句话，按你的策略自动完成**
+> **像安卓/Linux一样，你在上面做开发**
 > 
-> 系统是通用引擎，策略是你自己配的。
-> 你说一句话，系统按你定义的流程自动执行。
+> 内核是通用的，插件是可扩展的，策略是你定义的。
 
 ---
 
@@ -14,139 +13,133 @@
 pip install -r requirements.txt
 ```
 
-### 第二步：配置策略（最重要！）
-打开 `strategy.yaml`，定义**你的个人策略**：
-
-```yaml
-my_strategy:
-  金融:
-    steps:
-      - step: 搜索
-        config:
-          sources: ["coingecko", "yahoo_finance"]
-      - step: 布林带分析
-        config:
-          symbols: ["BTCUSDT", "ETHUSDT", "NVDA"]
-          strategy: "下轨做多，上轨看空"
-      - step: LLM决策
-        config:
-          prompt: "给出明确的买卖建议"
-      - step: 推送微信
-        config:
-          enabled: true
-```
-
-### 第三步：配置API Key（可选）
+### 第二步：配置系统（交互式）
 ```bash
-cp .env.example .env
-# 打开 .env 文件填写API Key
+python setup_wizard.py
 ```
 
-### 第四步：开始使用
+系统会问你：
+1. 你想用哪个交易所？（Binance/CoinGecko/YahooFinance/Finviz）
+2. 你想用哪个策略？（布林带/MACD/RSI）
+3. 你想用哪个大模型？（DeepSeek/MockLLM）
+4. 是否推送微信？
+5. 交易对是什么？
+6. 时间周期是多少？
+
+### 第三步：开始使用
 ```bash
 python demo.py
 ```
 
 ---
 
-## 🎯 使用示例
+## 🏗️ 架构设计
 
-### 场景1：金融分析（按你的布林带策略）
 ```
-你说：帮我分析今天的金融市场
-
-系统按你的策略执行：
-📋 策略流程: 搜索 → 布林带分析 → LLM决策 → 推送微信
-
-步骤 1: 搜索
-【coingecko】...
-【yahoo_finance】...
-
-步骤 2: 布林带分析
-⏱️ 时间周期: 4h
-📖 策略: 下轨做多，上轨看空
-BTCUSDT: 做多 (当前42000, 上轨45000, 下轨41500)
-ETHUSDT: 观望 (当前43000, 上轨45500, 下轨40500)
-
-步骤 3: LLM决策
-根据布林带信号，BTCUSDT建议做多...
-
-步骤 4: 推送微信
-✅ 推送微信成功
-```
-
-### 场景2：生成梗图（按你的文案策略）
-```
-你说：给我生成一个搞笑梗图
-
-系统按你的策略执行：
-📋 策略流程: 搜索 → 生成梗图 → LLM润色文案 → 保存草稿
-
-步骤 1: 搜索
-【weibo】...
-
-步骤 2: 生成梗图
-主题: 周一不想上班
-文案: 周一的我：不想上班！
-
-步骤 3: LLM润色文案
-原文案: 周一的我：不想上班！
-润色后: 周一的我：不想上班！不想上班！！
-
-步骤 4: 保存草稿
-✅ 微信/微博/抖音 草稿箱已保存
+┌────────────────────────────────────────────────────────┐
+│                    Agent OS 内核                        │
+│  - 意图识别     - 插件调度     - RAG记忆     - 执行管道   │
+│  (零业务逻辑，纯调度)                                    │
+└──────────────────┬─────────────────────────────────────┘
+                   │ 插件接口
+┌──────────────────▼─────────────────────────────────────┐
+│                     插件层                              │
+│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌─────────┐ │
+│  │交易所插件  │ │策略插件    │ │LLM插件    │ │行动插件  │ │
+│  │Binance    │ │Bollinger  │ │DeepSeek   │ │微信推送  │ │
+│  │CoinGecko  │ │MACD       │ │MockLLM    │ │保存草稿  │ │
+│  │YahooFin   │ │RSI        │ │           │ │生成梗图  │ │
+│  │Finviz     │ │SimpleHold │ │           │ │润色文案  │ │
+│  └───────────┘ └───────────┘ └───────────┘ └─────────┘ │
+│  (可自由添加新插件)                                      │
+└────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📋 策略配置详解
+## 📦 插件列表
 
-打开 [strategy.yaml](file:///E:/Antigravity/biance/agent_os/strategy.yaml)，按你的想法改：
+### 交易所插件 (exchange)
+| 插件名 | 描述 | 参数 |
+|--------|------|------|
+| Binance | Binance交易所K线 | symbol, timeframe |
+| CoinGecko | 加密货币数据 | symbol |
+| YahooFinance | 股票数据 | symbol, timeframe |
+| Finviz | 股票基本面 | symbol |
 
-### 可选步骤
-| 步骤名 | 说明 | 配置项 |
-|--------|------|--------|
-| 搜索 | 搜索相关信息 | sources: 数据源列表 |
-| 布林带分析 | 技术分析 | symbols, timeframe, strategy |
-| LLM决策 | 大模型分析 | prompt: 分析指令 |
-| 生成梗图 | 生成搞笑梗图 | style: 风格 |
-| LLM润色文案 | 优化文案 | style: 风格要求 |
-| 推送微信 | 推送到微信 | enabled: true/false |
-| 保存草稿 | 保存到各平台草稿箱 | platforms: 平台列表 |
+### 策略插件 (strategy)
+| 插件名 | 描述 | 参数 |
+|--------|------|------|
+| BollingerBand | 布林带策略 | period, std_multiplier |
+| MACD | MACD策略 | fast_period, slow_period |
+| RSI | RSI策略 | period, oversold, overbought |
+| SimpleHold | 简单持有 | - |
 
-### 模板示例
+### LLM插件 (llm)
+| 插件名 | 描述 | 参数 |
+|--------|------|------|
+| DeepSeek | DeepSeek大模型 | api_key, prompt |
+| MockLLM | 模拟LLM（测试用） | prompt |
+
+### 行动插件 (action)
+| 插件名 | 描述 | 参数 |
+|--------|------|------|
+| ServerChanPush | 推送微信 | skey, message |
+| SaveDraft | 保存草稿箱 | topic, copy, platforms |
+| MemeGenerator | 生成梗图 | style |
+| Polisher | 润色文案 | original, style |
+
+---
+
+## 📋 策略配置
+
+打开 `strategy.yaml`，定义你的流程：
+
 ```yaml
-# 模板1: 简单分析
-simple:
-  金融: [搜索]
-
-# 模板2: 技术分析
-technical:
-  金融: [搜索, 布林带分析, 推送微信]
-
-# 模板3: AI决策
-ai_decision:
-  金融: [搜索, 布林带分析, LLM决策, 推送微信]
+my_strategy:
+  金融:
+    steps:
+      - plugin: Binance
+        config:
+          symbol: BTCUSDT
+          timeframe: 4h
+      - plugin: BollingerBand
+        config: {}
+      - plugin: DeepSeek
+        config:
+          prompt: "给出明确的买卖建议"
+      - plugin: ServerChanPush
+        config: {}
 ```
 
 ---
 
-## 🏗️ 分层架构
+## 🧩 开发新插件
 
-```
-你说一句话 → 识别领域 → 按你的策略执行
+只需创建一个继承 `Plugin` 的类：
 
-┌──────────────────────────────────────────────────────┐
-│                   搜索层 (Search Layer)              │
-│  按你的配置选数据源：金融→coingecko，搞笑→微博          │
-├──────────────────────────────────────────────────────┤
-│                   策略层 (Strategy Layer)            │
-│  你的个人策略，可配置：布林带/MACD/只看新闻/LLM分析     │
-├──────────────────────────────────────────────────────┤
-│                   行动层 (Action Layer)              │
-│  按你的配置执行：推送微信/保存草稿/只看结果             │
-└──────────────────────────────────────────────────────┘
+```python
+from agent_os.plugins import Plugin
+
+class MyPlugin(Plugin):
+    name = "MyPlugin"
+    description = "我的自定义插件"
+    category = "strategy"
+    
+    def execute(self, config):
+        # 你的业务逻辑
+        return {
+            'success': True,
+            'signal': '做多',
+        }
+    
+    def get_params(self):
+        return {
+            'param1': {'type': 'string', 'description': '参数说明'},
+        }
 ```
+
+保存到 `plugins/my_plugin.py`，系统会自动加载！
 
 ---
 
@@ -155,33 +148,57 @@ ai_decision:
 ```
 agent_os/
 ├── core/
-│   └── agent_os.py      # 核心引擎（通用，不用改）
-├── strategy.yaml        # 你的策略配置（改这里！）
+│   └── agent_os.py      # 内核（纯调度，零业务逻辑）
+├── plugins/
+│   ├── __init__.py      # 插件基类和管理器
+│   ├── exchanges.py     # 交易所插件
+│   ├── strategies.py    # 策略插件
+│   ├── llm_providers.py # LLM插件
+│   └── actions.py       # 行动插件
+├── strategy.yaml        # 策略配置（你定义流程）
 ├── config.py            # API配置
-├── .env.example         # API Key模板
+├── setup_wizard.py      # 交互式配置向导
 ├── demo.py              # 演示脚本
-├── main.py              # 交互式入口
-├── drafts/              # 各平台草稿箱
-└── README.md
+└── .env.example         # API Key模板
 ```
 
 ---
 
-## ⚙️ 核心逻辑
+## 🎯 使用示例
 
-1. **领域识别**：系统自动判断你想做什么
-2. **策略读取**：从 `strategy.yaml` 读取**你的**策略流程
-3. **步骤执行**：按你的策略一步步执行
-4. **行动输出**：按你的配置推送或保存
+```
+你说：帮我分析今天的金融市场
 
-> **策略是你的，引擎是通用的**
-> 
-> 你在 `strategy.yaml` 里定义：
-> - 金融：先用布林带还是先看新闻？
-> - 热点：要不要LLM润色文案？
-> - 电商：要不要推送到微信？
-> 
-> 完全由你决定！
+系统按你的策略执行：
+📋 策略流程: Binance → BollingerBand → DeepSeek → ServerChanPush
+
+步骤 1: Binance
+{exchange: Binance, symbol: BTCUSDT, prices: [...]}
+
+步骤 2: BollingerBand
+信号: 做多
+当前: 42000
+上轨: 45000
+下轨: 41500
+
+步骤 3: DeepSeek
+根据分析，建议做多。
+
+步骤 4: ServerChanPush
+✅ 推送微信成功
+```
+
+---
+
+## 📌 核心理念
+
+1. **内核是通用的**：不管你做什么领域，内核逻辑都一样
+2. **插件是可替换的**：换交易所、换策略、换LLM，都不用改内核
+3. **策略是你定义的**：你决定流程，系统帮你执行
+4. **低认知成本**：不懂代码也能用配置向导配置
+
+> **就像安卓一样**：Google提供操作系统，开发者在上面做App。
+> **Agent OS提供内核**，你在上面定义你的业务流程。
 
 ---
 
