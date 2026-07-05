@@ -1,0 +1,25 @@
+name: 金融信号Agent
+description: 每日金融信号分析和推送，包含加密货币和股票的布林带分析
+skills:
+  - FinanceCrawler
+  - BollingerAnalysis
+  - RAGRetrieval
+  - LLMDecision
+  - ServerChanNotify
+schedule: "0 9 * * *"
+params:
+  BollingerAnalysis:
+    symbols:
+      - BTCUSDT
+      - ETHUSDT
+      - NVDA
+      - AAPL
+      - MSFT
+      - GOOGL
+      - META
+      - AMZN
+      - TSLA
+  RAGRetrieval:
+    query: 市场分析
+  LLMDecision:
+    query: 给出投资建议

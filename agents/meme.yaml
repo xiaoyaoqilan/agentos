@@ -1,0 +1,14 @@
+name: 梗图收集Agent
+description: 自动收集热点梗图和生成文案，每半小时发布一次
+skills:
+  - HotCrawler
+  - MemeSearch
+  - Copywriter
+  - DraftPoster
+schedule: "*/30 * * * *"
+params:
+  HotCrawler:
+    platforms:
+      - weibo
+      - douyin
+      - jokes
